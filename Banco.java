@@ -22,7 +22,7 @@ public class Banco {
             limparTela();
 
             System.out.println("==============================================");
-            System.out.println("                 BANCO MASTER");
+            System.out.println("                 BANCO MAGIC");
             System.out.println("==============================================");
             System.out.println();
             System.out.println("1 - Login");
