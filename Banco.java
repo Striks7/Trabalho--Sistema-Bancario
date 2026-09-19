@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Banco {
-    
 
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Cliente> clientes = new ArrayList<>();
 
-    static DateTimeFormatter formatoData =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    static DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public static void main(String[] args) {
 
@@ -45,7 +43,7 @@ public class Banco {
 
                 case "3":
                     System.out.println();
-                    System.out.println("Obrigado por utilizar o Banco Master!");
+                    System.out.println("Obrigado por utilizar o Banco Magic!");
                     System.exit(0);
                     break;
 
@@ -72,7 +70,7 @@ public class Banco {
         System.out.println("              ██║╚██╔╝██║");
         System.out.println("              ██║ ╚═╝ ██║");
         System.out.println();
-        System.out.println("             BANCO MASTER");
+        System.out.println("             BANCO MAGIC");
         System.out.println();
         System.out.println("==============================================");
         System.out.println();
@@ -98,8 +96,23 @@ public class Banco {
         System.out.print("Nome completo: ");
         String nome = scanner.nextLine();
 
+        if (!nome.matches("[a-zA-ZÀ-ÿ ]+")) {
+            System.out.println("Nome inválido.");
+            pausar();
+            return;
+        }
+
         System.out.print("CPF: ");
         String cpf = scanner.nextLine();
+
+        // Verifica se o CPF tem 11 digitos
+
+        if (cpf.length() != 11) {
+            System.out.println();
+            System.out.println("CPF inválido.");
+            pausar();
+            return;
+        }
 
         // Verifica se CPF já existe
         for (Cliente cliente : clientes) {
@@ -183,7 +196,7 @@ public class Banco {
             limparTela();
 
             System.out.println("==============================================");
-            System.out.println("              BANCO MASTER");
+            System.out.println("              BANCO MAGIC");
             System.out.println("==============================================");
             System.out.println();
             System.out.println("Olá, " + cliente.nome);
@@ -271,13 +284,11 @@ public class Banco {
 
             cliente.adicionarExtrato(
                     "Depósito",
-                    valor
-            );
+                    valor);
 
             System.out.printf(
                     "%nDepósito realizado!%nNovo saldo: R$ %.2f%n",
-                    cliente.saldo
-            );
+                    cliente.saldo);
 
         } catch (Exception e) {
 
@@ -306,9 +317,9 @@ public class Banco {
 
             double valor = Double.parseDouble(scanner.nextLine());
 
-            if (valor <= 0) {
+            if (valor < 2) {
 
-                System.out.println("Valor inválido.");
+                System.out.println("O valor mínimo para saque é R$ 2,00.");
                 pausar();
                 return;
             }
@@ -325,13 +336,11 @@ public class Banco {
 
             cliente.adicionarExtrato(
                     "Saque",
-                    -valor
-            );
+                    -valor);
 
             System.out.printf(
                     "%nSaque realizado!%nSaldo atual: R$ %.2f%n",
-                    cliente.saldo
-            );
+                    cliente.saldo);
 
         } catch (Exception e) {
 
@@ -410,13 +419,11 @@ public class Banco {
 
             cliente.adicionarExtrato(
                     "Transferência para " + destinatario.nome,
-                    -valor
-            );
+                    -valor);
 
             destinatario.adicionarExtrato(
                     "Transferência de " + cliente.nome,
-                    valor
-            );
+                    valor);
 
             System.out.println();
             System.out.println("Transferência realizada com sucesso!");
@@ -482,29 +489,25 @@ public class Banco {
 
         System.out.printf(
                 "Saldo atual: R$ %.2f%n",
-                cliente.saldo
-        );
+                cliente.saldo);
 
         // Exemplo didático: rendimento de 1% sobre o saldo
         double rendimento = cliente.saldo * 0.01;
 
         System.out.printf(
                 "Rendimento de 1%%: R$ %.2f%n",
-                rendimento
-        );
+                rendimento);
 
         cliente.saldo += rendimento;
 
         cliente.adicionarExtrato(
                 "Rendimento de 1%",
-                rendimento
-        );
+                rendimento);
 
         System.out.println();
         System.out.printf(
                 "Novo saldo: R$ %.2f%n",
-                cliente.saldo
-        );
+                cliente.saldo);
 
         pausar();
     }
@@ -553,8 +556,7 @@ public class Banco {
 
             cliente.adicionarExtrato(
                     "Empréstimo recebido",
-                    valor
-            );
+                    valor);
 
             System.out.println();
             System.out.println("==============================================");
@@ -562,12 +564,10 @@ public class Banco {
             System.out.println("==============================================");
             System.out.printf(
                     "Valor recebido: R$ %.2f%n",
-                    valor
-            );
+                    valor);
             System.out.printf(
                     "Novo saldo: R$ %.2f%n",
-                    cliente.saldo
-            );
+                    cliente.saldo);
 
         } catch (Exception e) {
 
@@ -634,8 +634,7 @@ public class Banco {
                 sinal = "";
             }
 
-            String movimentacao =
-                    LocalDateTime.now().format(formatoData)
+            String movimentacao = LocalDateTime.now().format(formatoData)
                     + " | "
                     + operacao
                     + " | "
@@ -646,4 +645,3 @@ public class Banco {
         }
     }
 }
-    
