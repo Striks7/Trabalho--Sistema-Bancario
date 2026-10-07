@@ -106,8 +106,6 @@ public class Banco {
         System.out.print("CPF: ");
         String cpf = scanner.nextLine();
 
-        // Verifica se o CPF tem 11 digitos
-
         if (cpf.length() != 11) {
             System.out.println();
             System.out.println("CPF inválido.");
@@ -115,7 +113,6 @@ public class Banco {
             return;
         }
 
-        // Verifica se CPF já existe
         for (Cliente cliente : clientes) {
 
             if (cliente.cpf.equals(cpf)) {
@@ -130,7 +127,27 @@ public class Banco {
         System.out.print("Senha: ");
         String senha = scanner.nextLine();
 
-        Cliente novoCliente = new Cliente(nome, cpf, senha);
+        double saldoInicial = 0;
+        while (true) {
+            System.out.print("Saldo inicial (opcional; ENTER = R$ 0,00): R$ ");
+            String entrada = scanner.nextLine().trim();
+            if (entrada.isEmpty()) break;
+            if (!entrada.matches("[0-9]+([,.][0-9]{1,2})?")) {
+                System.out.println("Informe zero ou um valor positivo com até duas casas decimais, sem separador de milhar.");
+                continue;
+            }
+            try {
+                saldoInicial = Double.parseDouble(entrada.replace(',', '.'));
+                if (!Double.isFinite(saldoInicial)) {
+                    System.out.println("Valor muito grande. Informe outro valor.");
+                    continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Valor inválido. Exemplos: 100 ou 100,50.");
+            }
+        }
+        Cliente novoCliente = new Cliente(nome, cpf, senha, saldoInicial);
 
         clientes.add(novoCliente);
 
@@ -140,7 +157,7 @@ public class Banco {
         System.out.println("==============================================");
         System.out.println();
         System.out.println("Cliente: " + nome);
-        System.out.println("Saldo inicial: R$ 0,00");
+        System.out.printf("Saldo inicial: R$ %.2f%n", saldoInicial);
 
         pausar();
     }
@@ -308,53 +325,137 @@ public class Banco {
     // SAQUE
     // =====================================================
 
-    static void sacar(Cliente cliente) {
+static void sacar(Cliente cliente) {
 
-        limparTela();
+    limparTela();
 
-        System.out.println("==============================================");
-        System.out.println("                    SAQUE");
-        System.out.println("==============================================");
-        System.out.println();
+    System.out.println("==============================================");
+    System.out.println("                    SAQUE");
+    System.out.println("==============================================");
+    System.out.println();
 
-        System.out.print("Valor do saque: R$ ");
+    System.out.print("Valor do saque: R$ ");
 
-        try {
+    try {
 
-            double valor = Double.parseDouble(scanner.nextLine());
+        double valor = Double.parseDouble(scanner.nextLine());
 
-            if (valor < 2) {
-
-                System.out.println("O valor mínimo para saque é R$ 2,00.");
-                pausar();
-                return;
-            }
-
-            if (valor > cliente.saldo) {
-
-                System.out.println();
-                System.out.println("Saldo insuficiente.");
-                pausar();
-                return;
-            }
-
-            cliente.saldo -= valor;
-
-            cliente.adicionarExtrato(
-                    "Saque",
-                    -valor);
-
-            System.out.printf(
-                    "%nSaque realizado!%nSaldo atual: R$ %.2f%n",
-                    cliente.saldo);
-
-        } catch (Exception e) {
-
-            System.out.println("Digite um valor válido.");
+        if (valor <= 0) {
+            System.out.println();
+            System.out.println("O valor do saque deve ser maior que zero.");
+            pausar();
+            return;
         }
 
-        pausar();
+        if (valor % 1 != 0) {
+            System.out.println();
+            System.out.println(
+                    "O valor do saque deve ser inteiro, pois o caixa libera apenas notas.");
+            pausar();
+            return;
+        }
+
+        if (valor > cliente.saldo) {
+            System.out.println();
+            System.out.println("Saldo insuficiente.");
+            pausar();
+            return;
+        }
+
+        int restante = (int) valor;
+
+        int notas100 = restante / 100;
+        restante %= 100;
+
+        int notas50 = restante / 50;
+        restante %= 50;
+
+        int notas20 = restante / 20;
+        restante %= 20;
+
+        int notas10 = restante / 10;
+        restante %= 10;
+
+        int notas5 = 0;
+        int notas2 = 0;
+
+        if (restante % 2 == 0) {
+
+            notas2 = restante / 2;
+
+        } else if (restante >= 5 && (restante - 5) % 2 == 0) {
+
+            notas5 = 1;
+            notas2 = (restante - 5) / 2;
+
+        } else {
+
+            System.out.println();
+            System.out.println("==============================================");
+            System.out.println("             SAQUE NÃO REALIZADO");
+            System.out.println("==============================================");
+            System.out.println();
+            System.out.println("Não é possível realizar o saque.");
+            System.out.println("O valor solicitado não pode ser formado");
+            System.out.println("com as notas disponíveis:");
+            System.out.println("R$ 100, R$ 50, R$ 20, R$ 10, R$ 5 e R$ 2.");
+
+            pausar();
+            return;
+        }
+
+        cliente.saldo -= valor;
+
+        cliente.adicionarExtrato(
+                "Saque",
+                -valor);
+
+        System.out.println();
+        System.out.println("Notas liberadas:");
+
+        if (notas100 > 0) {
+            System.out.println(
+                    "R$ 100,00: " + notas100 + " nota(s)");
+        }
+
+        if (notas50 > 0) {
+            System.out.println(
+                    "R$ 50,00: " + notas50 + " nota(s)");
+        }
+
+        if (notas20 > 0) {
+            System.out.println(
+                    "R$ 20,00: " + notas20 + " nota(s)");
+        }
+
+        if (notas10 > 0) {
+            System.out.println(
+                    "R$ 10,00: " + notas10 + " nota(s)");
+        }
+
+        if (notas5 > 0) {
+            System.out.println(
+                    "R$ 5,00: " + notas5 + " nota(s)");
+        }
+
+        if (notas2 > 0) {
+            System.out.println(
+                    "R$ 2,00: " + notas2 + " nota(s)");
+        }
+
+        System.out.printf(
+                "%nSaque realizado!%nSaldo atual: R$ %.2f%n",
+                cliente.saldo);
+
+    } catch (NumberFormatException e) {
+
+        System.out.println();
+        System.out.println("Digite um valor válido.");
     }
+
+    pausar();
+}
+
 
     // =====================================================
     // TRANSFERÊNCIA
@@ -450,33 +551,28 @@ public class Banco {
     // =====================================================
 
     static void extrato(Cliente cliente) {
-
         limparTela();
-
         System.out.println("==============================================");
         System.out.println("                    EXTRATO");
         System.out.println("==============================================");
-        System.out.println();
-        System.out.println("Cliente: " + cliente.nome);
+        System.out.println("Nome do cliente: " + cliente.nome);
         System.out.println("CPF: " + cliente.cpf);
+        System.out.printf("Saldo inicial: R$ %.2f%n", cliente.saldoInicial);
         System.out.printf("Saldo atual: R$ %.2f%n", cliente.saldo);
-        System.out.println();
         System.out.println("----------------------------------------------");
-
-        if (cliente.extrato.isEmpty()) {
-
-            System.out.println("Nenhuma movimentação encontrada.");
-
-        } else {
-
-            for (String movimentacao : cliente.extrato) {
-
-                System.out.println(movimentacao);
-            }
+        System.out.println("Depósitos: quantidade = " + cliente.quantidadeDepositos);
+        System.out.printf("Depósitos: valor total = R$ %.2f%n", cliente.totalDepositos);
+        System.out.println("Saques: quantidade = " + cliente.quantidadeSaques);
+        System.out.printf("Saques: valor total = R$ %.2f%n", cliente.totalSaques);
+        System.out.printf("Total dos juros recebidos: R$ %.2f%n", cliente.totalJurosRecebidos);
+        System.out.printf("Saldo mínimo da conta: R$ %.2f%n", cliente.saldoMinimo);
+        System.out.printf("Saldo máximo da conta: R$ %.2f%n", cliente.saldoMaximo);
+        System.out.println("----------------------------------------------");
+        System.out.println("HISTÓRICO DE MOVIMENTAÇÕES");
+        for (String movimentacao : cliente.extrato) {
+            System.out.println(movimentacao);
         }
-
         System.out.println("----------------------------------------------");
-
         pausar();
     }
 
@@ -539,64 +635,69 @@ public class Banco {
 
     static void emprestimo(Cliente cliente) {
 
-        limparTela();
+    limparTela();
 
-        System.out.println("==============================================");
-        System.out.println("                 EMPRÉSTIMO");
-        System.out.println("==============================================");
-        System.out.println();
+    System.out.println("==============================================");
+    System.out.println("                 EMPRÉSTIMO");
+    System.out.println("==============================================");
+    System.out.println();
 
-        System.out.print("Valor desejado: R$ ");
+    try {
 
-        try {
+        System.out.print("Valor a ser emprestado: R$ ");
+        double valor = Double.parseDouble(scanner.nextLine());
 
-            double valor = Double.parseDouble(scanner.nextLine());
-
-            if (valor <= 0) {
-
-                System.out.println("Valor inválido.");
-                pausar();
-                return;
-            }
-
-            System.out.println();
-            System.out.println("Analisando solicitação...");
-
-            // Regra simples apenas para o projeto
-            if (valor > 50000) {
-
-                System.out.println();
-                System.out.println("Solicitação não aprovada.");
-                System.out.println("Limite máximo: R$ 50.000,00");
-
-                pausar();
-                return;
-            }
-
-            cliente.saldo += valor;
-
-            cliente.adicionarExtrato(
-                    "Empréstimo recebido",
-                    valor);
-
-            System.out.println();
-            System.out.println("==============================================");
-            System.out.println("       EMPRÉSTIMO APROVADO!");
-            System.out.println("==============================================");
-            System.out.printf(
-                    "Valor recebido: R$ %.2f%n",
-                    valor);
-            System.out.printf(
-                    "Novo saldo: R$ %.2f%n",
-                    cliente.saldo);
-
-        } catch (Exception e) {
-
-            System.out.println("Digite um valor válido.");
+        if (valor <= 0) {
+            System.out.println("O valor deve ser maior que zero.");
+            pausar();
+            return;
         }
 
-        pausar();
+        System.out.print("Taxa de juros mensal (%): ");
+        double taxa = Double.parseDouble(scanner.nextLine());
+
+        if (taxa <= 0) {
+            System.out.println("A taxa de juros deve ser maior que zero.");
+            pausar();
+            return;
+        }
+
+        System.out.print("Quantidade de parcelas: ");
+        int parcelas = Integer.parseInt(scanner.nextLine());
+
+        if (parcelas <= 0) {
+            System.out.println("A quantidade de parcelas deve ser maior que zero.");
+            pausar();
+            return;
+        }
+
+        double juros = valor * (taxa / 100) * parcelas;
+        double total = valor + juros;
+        double valorParcela = total / parcelas;
+
+        System.out.println();
+        System.out.println("==============================================");
+        System.out.println("          SIMULAÇÃO DE EMPRÉSTIMO");
+        System.out.println("==============================================");
+
+        System.out.printf("Valor emprestado: R$ %.2f%n", valor);
+        System.out.printf("Taxa mensal: %.2f%%%n", taxa);
+        System.out.printf("Quantidade de parcelas: %d%n", parcelas);
+        System.out.printf("Valor de cada parcela: R$ %.2f%n", valorParcela);
+        System.out.printf("Total de juros: R$ %.2f%n", juros);
+        System.out.printf("Total a pagar: R$ %.2f%n", total);
+
+        System.out.println();
+        System.out.println("Simulação realizada com sucesso.");
+        System.out.println("O valor do empréstimo não foi adicionado ao saldo.");
+
+    } catch (NumberFormatException e) {
+
+        System.out.println("Digite valores numéricos válidos.");
     }
+
+    pausar();
+}
 
     // =====================================================
     // LIMPAR TELA
@@ -626,7 +727,7 @@ public class Banco {
         System.out.println("====== INTEGRANTES ======");
         System.out.println();
         System.out.println("Maria Clara Siqueira, Nicolas Renan da Silva Jablonski, Henry de Lima Coitinho, Jennifer Brandalize Rodrigues");
-    
+
         pausar();
     }
 
@@ -640,18 +741,43 @@ public class Banco {
         String cpf;
         String senha;
         double saldo;
+        final double saldoInicial;
+        double saldoMinimo;
+        double saldoMaximo;
+        int quantidadeDepositos;
+        int quantidadeSaques;
+        double totalDepositos;
+        double totalSaques;
+        double totalJurosRecebidos;
 
         ArrayList<String> extrato = new ArrayList<>();
 
-        Cliente(String nome, String cpf, String senha) {
+        Cliente(String nome, String cpf, String senha, double saldoInicial) {
 
             this.nome = nome;
             this.cpf = cpf;
             this.senha = senha;
-            this.saldo = 0;
+            this.saldoInicial = saldoInicial;
+            this.saldo = saldoInicial;
+            this.saldoMinimo = saldoInicial;
+            this.saldoMaximo = saldoInicial;
+            // Abertura não é contada como depósito.
+            adicionarExtrato("Saldo inicial", saldoInicial);
         }
 
         void adicionarExtrato(String operacao, double valor) {
+            if (operacao.equals("Depósito")) {
+                quantidadeDepositos++;
+                totalDepositos += valor;
+            } else if (operacao.equals("Saque")) {
+                quantidadeSaques++;
+                totalSaques += Math.abs(valor);
+            } else if (operacao.startsWith("Rendimento")) {
+                totalJurosRecebidos += valor;
+            }
+            // Cada operação original altera o saldo antes de registrar o extrato.
+            saldoMinimo = Math.min(saldoMinimo, saldo);
+            saldoMaximo = Math.max(saldoMaximo, saldo);
 
             String sinal;
 
@@ -669,7 +795,8 @@ public class Banco {
                     + operacao
                     + " | "
                     + sinal
-                    + String.format("R$ %.2f", valor);
+                    + String.format("R$ %.2f", valor)
+                    + String.format(" | Saldo: R$ %.2f", saldo);
 
             extrato.add(movimentacao);
         }
