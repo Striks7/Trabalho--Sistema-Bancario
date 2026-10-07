@@ -1,4 +1,5 @@
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -210,7 +211,8 @@ public class Banco {
             System.out.println("4 - Transferir");
             System.out.println("5 - Rendimento");
             System.out.println("6 - Empréstimo");
-            System.out.println("7 - Sair da conta");
+            System.out.println("7 - Integrantes");
+            System.out.println("8 - Sair da conta");
             System.out.println("----------------------------------------------");
             System.out.println();
 
@@ -245,6 +247,10 @@ public class Banco {
                     break;
 
                 case "7":
+                    integrantes();
+                    break;
+
+                case "8":
                     return;
 
                 default:
@@ -487,23 +493,38 @@ public class Banco {
         System.out.println("==============================================");
         System.out.println();
 
+        System.out.print("Digite a porcentagem (%) de juros a ser aplicada (deve ser maior que 0):");
+
+        Double juros = scanner.nextDouble();
+        scanner.nextLine();
+
+        if (juros < 0) {
+            System.out.println("o valor deve ser maior do que zero");
+            System.out.println();
+            pausar();
+            return;
+        }
+
         System.out.printf(
                 "Saldo atual: R$ %.2f%n",
                 cliente.saldo);
 
-        // Exemplo didático: rendimento de 1% sobre o saldo
-        double rendimento = cliente.saldo * 0.01;
+        double rendimento = cliente.saldo * (juros/100);
 
         System.out.printf(
-                "Rendimento de 1%%: R$ %.2f%n",
+                "Rendimento de juros: R$ %.2f%n",
                 rendimento);
 
         cliente.saldo += rendimento;
 
         cliente.adicionarExtrato(
-                "Rendimento de 1%",
+                "Rendimento de" + juros,
                 rendimento);
 
+        DecimalFormat df = new DecimalFormat("0.##");
+        System.out.println();
+
+        System.out.println("Juros aplicado: " + df.format(juros) + "%");
         System.out.println();
         System.out.printf(
                 "Novo saldo: R$ %.2f%n",
@@ -598,6 +619,15 @@ public class Banco {
         System.out.println();
         System.out.println("Pressione ENTER para continuar...");
         scanner.nextLine();
+    }
+
+     static void integrantes() {
+
+        System.out.println("====== INTEGRANTES ======");
+        System.out.println();
+        System.out.println("Maria Clara Siqueira, Nicolas Renan da Silva Jablonski, Henry de Lima Coitinho, Jennifer Brandalize Rodrigues");
+    
+        pausar();
     }
 
     // =====================================================
