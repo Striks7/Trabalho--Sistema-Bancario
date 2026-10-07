@@ -1,6 +1,6 @@
 
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -10,7 +10,7 @@ public class Banco {
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Cliente> clientes = new ArrayList<>();
 
-    static DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    static DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static void main(String[] args) {
 
@@ -775,7 +775,6 @@ static void sacar(Cliente cliente) {
             } else if (operacao.startsWith("Rendimento")) {
                 totalJurosRecebidos += valor;
             }
-            // Cada operação original altera o saldo antes de registrar o extrato.
             saldoMinimo = Math.min(saldoMinimo, saldo);
             saldoMaximo = Math.max(saldoMaximo, saldo);
 
@@ -790,7 +789,7 @@ static void sacar(Cliente cliente) {
                 sinal = "";
             }
 
-            String movimentacao = LocalDateTime.now().format(formatoData)
+            String movimentacao = LocalDate.now().format(formatoData)
                     + " | "
                     + operacao
                     + " | "
